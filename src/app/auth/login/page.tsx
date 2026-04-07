@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Zap, TrendingUp, Dumbbell } from 'lucide-react';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -23,57 +23,110 @@ export default function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically send credentials to your backend
-    console.log('Login attempt:', formData);
-    // Redirect to dashboard on successful login
-    window.location.href = '/dashboard';
+    setIsLoading(true);
+    setTimeout(() => {
+      console.log('Login attempt:', formData);
+      window.location.href = '/dashboard';
+    }, 1000);
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+      {/* Left Section - Feature Showcase */}
+      <div className="hidden lg:flex lg:w-1/2 fixed left-0 top-0 h-screen flex-col items-center justify-center p-12 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 relative">
+        <div className="absolute top-8 left-8">
+          <div className="w-12 h-12 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center mb-2">
+            <span className="text-white font-bold text-xl">LS</span>
+          </div>
+          <h2 className="text-3xl font-bold text-white mt-2">LifeStack</h2>
+        </div>
 
-      <div className="flex-1 flex items-center justify-center py-12 px-4">
+        <div className="space-y-8 flex flex-col items-center">
+          <div className="space-y-6">
+            <div className="flex gap-4 group hover:translate-x-2 transition-transform">
+              <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
+                <Zap className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-1">Productivity</h3>
+                <p className="text-white/80 text-sm">Stay organized and boost your efficiency with smart tools</p>
+              </div>
+            </div>
+
+            <div className="flex gap-4 group hover:translate-x-2 transition-transform">
+              <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
+                <TrendingUp className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-1">Financial Insights</h3>
+                <p className="text-white/80 text-sm">Track expenses and manage your finances effortlessly</p>
+              </div>
+            </div>
+
+            <div className="flex gap-4 group hover:translate-x-2 transition-transform">
+              <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
+                <Dumbbell className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-1">Fitness Tracking</h3>
+                <p className="text-white/80 text-sm">Monitor your health goals and celebrate progress</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-white/60 text-sm absolute bottom-8 left-12 right-12 text-center">2024 © LifeStack. Your personal life management hub.</p>
+      </div>
+
+      {/* Right Section - Login Form */}
+      <div className="w-full lg:w-1/2 lg:absolute lg:right-0 lg:top-0 min-h-screen flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           {/* Header */}
-          <div className="text-center mb-8 animate-slideUp">
-            <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center mx-auto mb-4">
-              <span className="text-white font-bold text-2xl">L</span>
+          <div className="mb-10">
+            <div className="inline-flex items-center gap-2 mb-6">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
+                <span className="text-white font-bold text-lg">L</span>
+              </div>
+              <span className="font-semibold text-slate-900 dark:text-white">LifeStack</span>
             </div>
-            <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
-            <p className="text-slate-600 dark:text-slate-400">Sign in to your LifeStack account</p>
+            <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-3">Welcome Back</h1>
+            <p className="text-slate-600 dark:text-slate-400">Sign in to access your dashboard and manage your life</p>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="card-elevated p-8 animate-slideUp">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email Field */}
-            <div className="mb-5">
-              <label htmlFor="email" className="label-form">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Email Address
               </label>
-              
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
                   type="email"
                   id="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="you@example.com"
-                  className="w-full rounded-xl border border-border bg-background dark:bg-background py-2.5 pl-10 pr-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted/60"
+                  placeholder="name@example.com"
+                  className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-3 pl-11 pr-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none transition-all focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-400"
                   required
                 />
               </div>
             </div>
 
             {/* Password Field */}
-            <div className="mb-5">
-              <label htmlFor="password" className="label-form">
-                Password
-              </label>
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Password
+                </label>
+                <a href="#" className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium transition-colors">
+                  Forgot?
+                </a>
+              </div>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   id="password"
@@ -81,13 +134,13 @@ export default function LoginPage() {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="••••••••"
-                  className="w-full rounded-xl border border-border bg-background dark:bg-background py-2.5 pl-10 pr-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted/60"
+                  className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-3 pl-11 pr-11 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none transition-all focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-400"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -95,38 +148,52 @@ export default function LoginPage() {
             </div>
 
             {/* Remember Me */}
-            <div className="flex items-center gap-2 mb-6">
+            <div className="flex items-center gap-2.5 pt-1">
               <input
                 type="checkbox"
                 id="rememberMe"
                 name="rememberMe"
                 checked={formData.rememberMe}
                 onChange={handleChange}
-                className="w-4 h-4 rounded border-2 border-slate-300 accent-indigo-600"
+                className="w-4 h-4 rounded border-2 border-slate-300 dark:border-slate-600 accent-indigo-600 cursor-pointer"
               />
-              <label htmlFor="rememberMe" className="text-sm text-slate-600 dark:text-slate-400">
-                Remember me
+              <label htmlFor="rememberMe" className="text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
+                Keep me signed in
               </label>
             </div>
 
             {/* Submit Button */}
-            <button type="submit" className="btn-primary w-full mb-4">
-              Sign In
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-slate-400 disabled:to-slate-500 text-white font-semibold py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 mt-7 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Signing in...
+                </>
+              ) : (
+                <>
+                  Sign In
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
-
-            {/* Forgot Password Link */}
-            <div className="text-center">
-              <a href="#" className="text-sm text-indigo-600 hover:text-indigo-700 dark:hover:text-indigo-400 font-medium">
-                Forgot your password?
-              </a>
-            </div>
           </form>
 
+          {/* Divider */}
+          <div className="flex items-center gap-3 my-6">
+            <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700"></div>
+            <span className="text-xs font-medium text-slate-400 dark:text-slate-500">NEW HERE?</span>
+            <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700"></div>
+          </div>
+
           {/* Sign Up Link */}
-          <p className="text-center text-slate-600 dark:text-slate-400 mt-6">
-            Don't have an account?{' '}
-            <Link href="/auth/signup" className="text-indigo-600 hover:text-indigo-700 dark:hover:text-indigo-400 font-semibold">
-              Sign up
+          <p className="text-center text-slate-600 dark:text-slate-400">
+            Create a new account{' '}
+            <Link href="/auth/signup" className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold transition-colors">
+              here
             </Link>
           </p>
         </div>

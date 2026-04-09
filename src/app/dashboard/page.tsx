@@ -1,11 +1,19 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-import StatCard from '@/components/StatCard';
-import Card from '@/components/Card';
-import ProgressBar from '@/components/ProgressBar';
-import { Activity, TrendingUp, BookOpen, Zap, ArrowRight, Calendar, Flame, DollarSign } from 'lucide-react';
+import Link from "next/link";
+import Navbar from "@/components/Navbar";
+import StatCard from "@/components/StatCard";
+import Card from "@/components/Card";
+import ProgressBar from "@/components/ProgressBar";
+import {
+  Activity,
+  TrendingUp,
+  BookOpen,
+  Zap,
+  ArrowRight,
+  Flame,
+  DollarSign,
+} from "lucide-react";
 
 export default function Dashboard() {
   return (
@@ -16,8 +24,12 @@ export default function Dashboard() {
         <div className="container-responsive">
           {/* Welcome Section */}
           <div className="mb-12 animate-slideUp">
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">Welcome back, John! 👋</h1>
-            <p className="text-slate-600 dark:text-slate-400">Here's your life summary for today</p>
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">
+              Welcome back, John! 👋
+            </h1>
+            <p className="text-slate-600 dark:text-slate-400">
+              Here is your life summary for today
+            </p>
           </div>
 
           {/* Stats Grid */}
@@ -59,26 +71,40 @@ export default function Dashboard() {
               <div className="space-y-6">
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-slate-700 dark:text-slate-300 font-medium">Weekly Activity</span>
-                    <span className="text-sm text-slate-600 dark:text-slate-400">52/75 hours</span>
+                    <span className="text-slate-700 dark:text-slate-300 font-medium">
+                      Weekly Activity
+                    </span>
+                    <span className="text-sm text-slate-600 dark:text-slate-400">
+                      52/75 hours
+                    </span>
                   </div>
-                  <ProgressBar percentage={69} color="primary" showPercentage={false} />
+                  <ProgressBar
+                    percentage={69}
+                    color="primary"
+                    showPercentage={false}
+                  />
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-slate-700 dark:text-slate-300 font-medium">BMI Status</span>
+                    <span className="text-slate-700 dark:text-slate-300 font-medium">
+                      BMI Status
+                    </span>
                     <span className="badge badge-success text-xs">Healthy</span>
                   </div>
                   <p className="text-2xl font-bold">22.5</p>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Height: 5'10" | Weight: 154 lbs</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                    Height: 5 ft 10 in | Weight: 154 lbs
+                  </p>
                 </div>
 
                 <Link
                   href="/fitness"
                   className="flex items-center justify-between p-4 mt-4 rounded-lg bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 hover:shadow-md transition-shadow"
                 >
-                  <span className="font-semibold text-indigo-700 dark:text-indigo-300">View Full Fitness Details</span>
+                  <span className="font-semibold text-indigo-700 dark:text-indigo-300">
+                    View Full Fitness Details
+                  </span>
                   <ArrowRight className="w-5 h-5 text-indigo-700 dark:text-indigo-300" />
                 </Link>
               </div>
@@ -88,9 +114,9 @@ export default function Dashboard() {
             <Card title="Recent Workouts">
               <div className="space-y-3">
                 {[
-                  { name: 'Running', duration: '45 min', cal: 520 },
-                  { name: 'Weight Training', duration: '60 min', cal: 380 },
-                  { name: 'Yoga', duration: '30 min', cal: 120 },
+                  { name: "Running", duration: "45 min", cal: 520 },
+                  { name: "Weight Training", duration: "60 min", cal: 380 },
+                  { name: "Yoga", duration: "30 min", cal: 120 },
                 ].map((workout, idx) => (
                   <div
                     key={idx}
@@ -98,10 +124,16 @@ export default function Dashboard() {
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-semibold text-slate-900 dark:text-white">{workout.name}</p>
-                        <p className="text-xs text-slate-600 dark:text-slate-400">{workout.duration}</p>
+                        <p className="font-semibold text-slate-900 dark:text-white">
+                          {workout.name}
+                        </p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400">
+                          {workout.duration}
+                        </p>
                       </div>
-                      <span className="badge badge-warning text-xs">{workout.cal} cal</span>
+                      <span className="badge badge-warning text-xs">
+                        {workout.cal} cal
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -188,24 +220,52 @@ export default function Dashboard() {
             <Card title="Recent Transactions" className="lg:col-span-2">
               <div className="space-y-3">
                 {[
-                  { desc: 'Grocery Shopping', amount: '-$45.32', category: 'Food', date: 'Today' },
-                  { desc: 'Salary Deposit', amount: '+$3,500', category: 'Income', date: 'Yesterday' },
-                  { desc: 'Gym Membership', amount: '-$50', category: 'Health', date: '2 days ago' },
-                  { desc: 'Coffee', amount: '-$5.50', category: 'Food', date: '2 days ago' },
+                  {
+                    desc: "Grocery Shopping",
+                    amount: "-$45.32",
+                    category: "Food",
+                    date: "Today",
+                  },
+                  {
+                    desc: "Salary Deposit",
+                    amount: "+$3,500",
+                    category: "Income",
+                    date: "Yesterday",
+                  },
+                  {
+                    desc: "Gym Membership",
+                    amount: "-$50",
+                    category: "Health",
+                    date: "2 days ago",
+                  },
+                  {
+                    desc: "Coffee",
+                    amount: "-$5.50",
+                    category: "Food",
+                    date: "2 days ago",
+                  },
                 ].map((tx, idx) => (
                   <div
                     key={idx}
                     className="flex items-center justify-between p-4 rounded-lg bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-600"
                   >
                     <div className="flex-1">
-                      <p className="font-semibold text-slate-900 dark:text-white">{tx.desc}</p>
-                      <p className="text-xs text-slate-600 dark:text-slate-400">{tx.date}</p>
+                      <p className="font-semibold text-slate-900 dark:text-white">
+                        {tx.desc}
+                      </p>
+                      <p className="text-xs text-slate-600 dark:text-slate-400">
+                        {tx.date}
+                      </p>
                     </div>
                     <div className="text-right">
-                      <p className={`font-semibold ${tx.amount.startsWith('+') ? 'text-green-600' : 'text-slate-900 dark:text-white'}`}>
+                      <p
+                        className={`font-semibold ${tx.amount.startsWith("+") ? "text-green-600" : "text-slate-900 dark:text-white"}`}
+                      >
                         {tx.amount}
                       </p>
-                      <span className="badge badge-primary text-xs">{tx.category}</span>
+                      <span className="badge badge-primary text-xs">
+                        {tx.category}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -217,10 +277,16 @@ export default function Dashboard() {
               <div className="space-y-4">
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-slate-700 dark:text-slate-300">Spent this month</span>
+                    <span className="text-slate-700 dark:text-slate-300">
+                      Spent this month
+                    </span>
                     <span className="font-bold">$1,250</span>
                   </div>
-                  <ProgressBar percentage={62} color="warning" showPercentage={false} />
+                  <ProgressBar
+                    percentage={62}
+                    color="warning"
+                    showPercentage={false}
+                  />
                 </div>
                 <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
                   <p className="text-sm text-green-700 dark:text-green-300">

@@ -12,14 +12,9 @@ import {
   createTransaction,
   updateTransaction,
   deleteTransaction,
-  getTotalIncome,
-  getTotalExpenses,
-  getBalance,
   getCategoryWiseSpending,
   getFinancialSummary,
   getRecentTransactions,
-  getCurrentMonthTransactions,
-  getMonthlyFinancialSummary,
 } from "./queries";
 
 // =============================================================================
@@ -114,12 +109,16 @@ function validateDateFilters(
   const errors: string[] = [];
   let validStartDate: Date | undefined;
   let validEndDate: Date | undefined;
+  const isDateOnly = (value: string): boolean =>
+    /^\d{4}-\d{2}-\d{2}$/.test(value);
 
   if (startDate) {
     validStartDate = new Date(startDate);
     if (isNaN(validStartDate.getTime())) {
       errors.push("Invalid start date format");
       validStartDate = undefined;
+    } else if (isDateOnly(startDate)) {
+      validStartDate.setHours(0, 0, 0, 0);
     }
   }
 
@@ -128,6 +127,9 @@ function validateDateFilters(
     if (isNaN(validEndDate.getTime())) {
       errors.push("Invalid end date format");
       validEndDate = undefined;
+    } else if (isDateOnly(endDate)) {
+      // Include the entire day for date-only filters.
+      validEndDate.setHours(23, 59, 59, 999);
     }
   }
 
@@ -495,7 +497,15 @@ export async function getFinancialSummaryService(
     if (filters?.period === "current_month") {
       const now = new Date();
       startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-      endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      endDate = new Date(
+        now.getFullYear(),
+        now.getMonth() + 1,
+        0,
+        23,
+        59,
+        59,
+        999,
+      );
       periodDescription = "Current month";
     } else if (filters?.startDate || filters?.endDate) {
       const dateValidation = validateDateFilters(

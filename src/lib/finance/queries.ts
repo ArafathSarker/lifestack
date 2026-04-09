@@ -11,9 +11,11 @@ export interface Category {
 export interface TransactionData {
   categoryId: string;
   amount: number;
-  description?: string;
+  description?: string | null;
   transaction_date?: Date;
 }
+
+type QueryParam = string | number | Date | null;
 
 export interface Transaction {
   id: string;
@@ -128,8 +130,8 @@ export async function getUserCategories(userId: string): Promise<Category[]> {
     const query = `
       SELECT DISTINCT fc.id, fc.name, fc.type
       FROM finance_categories fc
-      INNER JOIN transactions t ON fc.id = t.categoryId
-      WHERE t.userId = $1
+      INNER JOIN transactions t ON fc.id = t.category_id
+      WHERE t.user_id = $1
       ORDER BY fc.type, fc.name ASC
     `;
 
@@ -161,19 +163,19 @@ export async function getTransactions(
     let query = `
       SELECT 
         t.id,
-        t.userId,
-        t.categoryId,
-        fc.name as categoryName,
-        fc.type as categoryType,
+        t.user_id as "userId",
+        t.category_id as "categoryId",
+        fc.name as "categoryName",
+        fc.type as "categoryType",
         t.amount,
         t.description,
         t.transaction_date
       FROM transactions t
-      INNER JOIN finance_categories fc ON t.categoryId = fc.id
-      WHERE t.userId = $1
+      INNER JOIN finance_categories fc ON t.category_id = fc.id
+      WHERE t.user_id = $1
     `;
 
-    const params: any[] = [userId];
+    const params: QueryParam[] = [userId];
     let paramIndex = 2;
 
     // Apply filters
@@ -190,7 +192,7 @@ export async function getTransactions(
     }
 
     if (filters?.categoryId) {
-      query += ` AND t.categoryId = $${paramIndex}`;
+      query += ` AND t.category_id = $${paramIndex}`;
       params.push(filters.categoryId);
       paramIndex++;
     }
@@ -240,9 +242,9 @@ export async function createTransaction(
     }
 
     const insertQuery = `
-      INSERT INTO transactions (userId, categoryId, amount, description, transaction_date)
+      INSERT INTO transactions (user_id, category_id, amount, description, transaction_date)
       VALUES ($1, $2, $3, $4, $5)
-      RETURNING *
+      RETURNING id, user_id as "userId", category_id as "categoryId", amount, description, transaction_date
     `;
 
     const transactionDate = data.transaction_date || new Date();
@@ -288,7 +290,7 @@ export async function updateTransaction(
   try {
     // Build dynamic update query
     const updateFields: string[] = [];
-    const params: any[] = [id, userId];
+    const params: QueryParam[] = [id, userId];
     let paramIndex = 3;
 
     if (data.categoryId !== undefined) {
@@ -301,7 +303,7 @@ export async function updateTransaction(
         throw new Error("Invalid category ID");
       }
 
-      updateFields.push(`categoryId = $${paramIndex}`);
+      updateFields.push(`category_id = $${paramIndex}`);
       params.push(data.categoryId);
       paramIndex++;
     }
@@ -331,7 +333,7 @@ export async function updateTransaction(
     const updateQuery = `
       UPDATE transactions 
       SET ${updateFields.join(", ")}
-      WHERE id = $1 AND userId = $2
+      WHERE id = $1 AND user_id = $2
       RETURNING *
     `;
 
@@ -341,17 +343,37 @@ export async function updateTransaction(
       throw new Error("Transaction not found or access denied");
     }
 
-    // Get transaction with category info
-    const transactionWithCategory = await getTransactions(userId, {
-      limit: 1,
-    });
+    // Fetch the updated row with category metadata directly.
+    const selectUpdatedQuery = `
+      SELECT 
+        t.id,
+        t.user_id as "userId",
+        t.category_id as "categoryId",
+        fc.name as "categoryName",
+        fc.type as "categoryType",
+        t.amount,
+        t.description,
+        t.transaction_date
+      FROM transactions t
+      INNER JOIN finance_categories fc ON t.category_id = fc.id
+      WHERE t.id = $1 AND t.user_id = $2
+      LIMIT 1
+    `;
 
-    const updatedTransaction = transactionWithCategory.find((t) => t.id === id);
+    const updatedTransactionResult = await client.query(selectUpdatedQuery, [
+      id,
+      userId,
+    ]);
+    const updatedTransaction = updatedTransactionResult.rows[0];
+
     if (!updatedTransaction) {
       throw new Error("Failed to retrieve updated transaction");
     }
 
-    return updatedTransaction;
+    return {
+      ...updatedTransaction,
+      amount: parseFloat(updatedTransaction.amount),
+    };
   } catch (error) {
     console.error("Error updating transaction:", error);
     if (error instanceof Error) {
@@ -375,11 +397,11 @@ export async function deleteTransaction(
   try {
     const deleteQuery = `
       DELETE FROM transactions 
-      WHERE id = $1 AND userId = $2
+      WHERE id = $1 AND user_id = $2
     `;
 
     const result = await client.query(deleteQuery, [id, userId]);
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   } catch (error) {
     console.error("Error deleting transaction:", error);
     throw new Error("Failed to delete transaction");
@@ -407,11 +429,11 @@ export async function getTotalIncome(
     let query = `
       SELECT COALESCE(SUM(t.amount), 0) as total
       FROM transactions t
-      INNER JOIN finance_categories fc ON t.categoryId = fc.id
-      WHERE t.userId = $1 AND fc.type = 'income'
+      INNER JOIN finance_categories fc ON t.category_id = fc.id
+      WHERE t.user_id = $1 AND fc.type = 'income'
     `;
 
-    const params: any[] = [userId];
+    const params: QueryParam[] = [userId];
     let paramIndex = 2;
 
     if (startDate) {
@@ -450,11 +472,11 @@ export async function getTotalExpenses(
     let query = `
       SELECT COALESCE(SUM(t.amount), 0) as total
       FROM transactions t
-      INNER JOIN finance_categories fc ON t.categoryId = fc.id
-      WHERE t.userId = $1 AND fc.type = 'expense'
+      INNER JOIN finance_categories fc ON t.category_id = fc.id
+      WHERE t.user_id = $1 AND fc.type = 'expense'
     `;
 
-    const params: any[] = [userId];
+    const params: QueryParam[] = [userId];
     let paramIndex = 2;
 
     if (startDate) {
@@ -495,11 +517,11 @@ export async function getBalance(
         COALESCE(SUM(CASE WHEN fc.type = 'income' THEN t.amount ELSE 0 END), 0) as income,
         COALESCE(SUM(CASE WHEN fc.type = 'expense' THEN t.amount ELSE 0 END), 0) as expenses
       FROM transactions t
-      INNER JOIN finance_categories fc ON t.categoryId = fc.id
-      WHERE t.userId = $1
+      INNER JOIN finance_categories fc ON t.category_id = fc.id
+      WHERE t.user_id = $1
     `;
 
-    const params: any[] = [userId];
+    const params: QueryParam[] = [userId];
     let paramIndex = 2;
 
     if (startDate) {
@@ -538,16 +560,16 @@ export async function getCategoryWiseSpending(
   try {
     let query = `
       SELECT 
-        fc.id as categoryId,
-        fc.name as categoryName,
-        fc.type as categoryType,
-        COALESCE(SUM(t.amount), 0) as totalAmount,
-        COUNT(t.id) as transactionCount
+        fc.id as "categoryId",
+        fc.name as "categoryName",
+        fc.type as "categoryType",
+        COALESCE(SUM(t.amount), 0) as "totalAmount",
+        COUNT(t.id) as "transactionCount"
       FROM finance_categories fc
-      LEFT JOIN transactions t ON fc.id = t.categoryId AND t.userId = $1
+      LEFT JOIN transactions t ON fc.id = t.category_id AND t.user_id = $1
     `;
 
-    const params: any[] = [userId];
+    const params: QueryParam[] = [userId];
     let paramIndex = 2;
 
     if (startDate || endDate) {
@@ -568,14 +590,14 @@ export async function getCategoryWiseSpending(
     query += `
       GROUP BY fc.id, fc.name, fc.type
       HAVING COUNT(t.id) > 0
-      ORDER BY totalAmount DESC, fc.name ASC
+      ORDER BY "totalAmount" DESC, fc.name ASC
     `;
 
     const result = await client.query(query, params);
     return result.rows.map((row) => ({
       ...row,
-      totalAmount: parseFloat(row.totalamount),
-      transactionCount: parseInt(row.transactioncount),
+      totalAmount: parseFloat(row.totalAmount),
+      transactionCount: parseInt(row.transactionCount, 10),
     }));
   } catch (error) {
     console.error("Error fetching category-wise spending:", error);
@@ -599,14 +621,14 @@ export async function getFinancialSummary(
   try {
     let query = `
       SELECT 
-        COALESCE(SUM(CASE WHEN fc.type = 'income' THEN t.amount ELSE 0 END), 0) as totalIncome,
-        COALESCE(SUM(CASE WHEN fc.type = 'expense' THEN t.amount ELSE 0 END), 0) as totalExpenses
+        COALESCE(SUM(CASE WHEN fc.type = 'income' THEN t.amount ELSE 0 END), 0) as "totalIncome",
+        COALESCE(SUM(CASE WHEN fc.type = 'expense' THEN t.amount ELSE 0 END), 0) as "totalExpenses"
       FROM transactions t
-      INNER JOIN finance_categories fc ON t.categoryId = fc.id
-      WHERE t.userId = $1
+      INNER JOIN finance_categories fc ON t.category_id = fc.id
+      WHERE t.user_id = $1
     `;
 
-    const params: any[] = [userId];
+    const params: QueryParam[] = [userId];
     let paramIndex = 2;
 
     if (startDate) {
@@ -621,10 +643,11 @@ export async function getFinancialSummary(
     }
 
     const result = await client.query(query, params);
-    const { totalincome, totalexpenses } = result.rows[0];
+    const { totalIncome: rawTotalIncome, totalExpenses: rawTotalExpenses } =
+      result.rows[0];
 
-    const totalIncome = parseFloat(totalincome);
-    const totalExpenses = parseFloat(totalexpenses);
+    const totalIncome = parseFloat(rawTotalIncome);
+    const totalExpenses = parseFloat(rawTotalExpenses);
     const balance = totalIncome - totalExpenses;
 
     return {
@@ -662,7 +685,15 @@ export async function getCurrentMonthTransactions(
 ): Promise<Transaction[]> {
   const now = new Date();
   const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-  const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  const endDate = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+    23,
+    59,
+    59,
+    999,
+  );
 
   return getTransactions(userId, { startDate, endDate });
 }
@@ -675,7 +706,15 @@ export async function getMonthlyFinancialSummary(
 ): Promise<FinancialSummary> {
   const now = new Date();
   const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-  const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  const endDate = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+    23,
+    59,
+    59,
+    999,
+  );
 
   return getFinancialSummary(userId, startDate, endDate);
 }

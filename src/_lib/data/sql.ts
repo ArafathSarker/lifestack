@@ -13,7 +13,7 @@ export const tableQueries: TableQuery[] = [
       height_cm FLOAT,
       current_weight FLOAT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );`
+    );`,
   },
   {
     name: "workout_logs",
@@ -23,7 +23,7 @@ export const tableQueries: TableQuery[] = [
       activity_type TEXT NOT NULL,
       duration_mins INTEGER,
       log_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );`
+    );`,
   },
   {
     name: "calorie_logs",
@@ -33,7 +33,7 @@ export const tableQueries: TableQuery[] = [
       calories_consumed INTEGER,
       calories_burned INTEGER,
       log_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );`
+    );`,
   },
   {
     name: "finance_categories",
@@ -41,18 +41,18 @@ export const tableQueries: TableQuery[] = [
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       name TEXT NOT NULL,
       type TEXT NOT NULL
-    );`
+    );`,
   },
   {
     name: "transactions",
     query: `CREATE TABLE transactions (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      userId UUID REFERENCES users(id) ON DELETE CASCADE,
-      categoryId UUID REFERENCES finance_categories(id),
+      user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+      category_id UUID REFERENCES finance_categories(id),
       amount DECIMAL(12, 2) NOT NULL,
       description TEXT,
       transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );`
+    );`,
   },
   {
     name: "study_tasks",
@@ -63,7 +63,7 @@ export const tableQueries: TableQuery[] = [
       task_description TEXT,
       deadline TIMESTAMP,
       status TEXT DEFAULT 'pending'
-    );`
+    );`,
   },
   {
     name: "study_sessions",
@@ -73,6 +73,6 @@ export const tableQueries: TableQuery[] = [
       taskId UUID REFERENCES study_tasks(id) ON DELETE CASCADE,
       duration_seconds INTEGER,
       started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );`
-  }
+    );`,
+  },
 ];

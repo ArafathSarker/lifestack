@@ -6,6 +6,18 @@ import {
   ServiceError,
   NotFoundError,
 } from "@/lib/finance/services";
+import type { TransactionData } from "@/lib/finance/queries";
+
+type RouteContext = {
+  params: Promise<{ id: string }>;
+};
+
+type UpdateTransactionBody = {
+  categoryId?: string;
+  amount?: number | string;
+  description?: string | null;
+  transaction_date?: string;
+};
 
 // =============================================================================
 // UTILITY FUNCTIONS
@@ -78,6 +90,15 @@ function createErrorResponse(
   );
 }
 
+function parseTransactionDateInput(value: string): Date {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [year, month, day] = value.split("-").map((part) => Number(part));
+    return new Date(year, month - 1, day, 0, 0, 0, 0);
+  }
+
+  return new Date(value);
+}
+
 // =============================================================================
 // API ROUTE HANDLERS
 // =============================================================================
@@ -93,13 +114,10 @@ function createErrorResponse(
  *   transaction_date?: ISO date string
  * }
  */
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function PUT(request: NextRequest, context: RouteContext) {
   try {
     const userId = getUserId(request);
-    const transactionId = params.id;
+    const { id: transactionId } = await context.params;
 
     if (!transactionId) {
       return NextResponse.json(
@@ -112,9 +130,9 @@ export async function PUT(
     }
 
     // Parse request body
-    let body;
+    let body: UpdateTransactionBody;
     try {
-      body = await request.json();
+      body = (await request.json()) as UpdateTransactionBody;
     } catch {
       return NextResponse.json(
         {
@@ -128,14 +146,15 @@ export async function PUT(
     const { categoryId, amount, description, transaction_date } = body;
 
     // Prepare update data (only include provided fields)
-    const updateData: any = {};
+    const updateData: Partial<TransactionData> = {};
 
     if (categoryId !== undefined) {
       updateData.categoryId = categoryId;
     }
 
     if (amount !== undefined) {
-      updateData.amount = parseFloat(amount);
+      updateData.amount =
+        typeof amount === "number" ? amount : parseFloat(amount);
     }
 
     if (description !== undefined) {
@@ -143,7 +162,7 @@ export async function PUT(
     }
 
     if (transaction_date !== undefined) {
-      updateData.transaction_date = new Date(transaction_date);
+      updateData.transaction_date = parseTransactionDateInput(transaction_date);
     }
 
     // Update transaction using service
@@ -169,13 +188,10 @@ export async function PUT(
  * DELETE /api/finance/transactions/[id]
  * Delete an existing transaction
  */
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
     const userId = getUserId(request);
-    const transactionId = params.id;
+    const { id: transactionId } = await context.params;
 
     if (!transactionId) {
       return NextResponse.json(

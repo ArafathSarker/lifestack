@@ -100,10 +100,12 @@ export function createErrorResponse(
  * Parse JSON body with error handling
  * Returns parsed body or null if parsing fails
  */
-export async function parseJsonBody(request: NextRequest): Promise<any> {
+export async function parseJsonBody<T = unknown>(
+  request: NextRequest,
+): Promise<T> {
   try {
-    return await request.json();
-  } catch (error) {
+    return (await request.json()) as T;
+  } catch {
     throw new ValidationError(["Invalid JSON body"]);
   }
 }
@@ -112,7 +114,7 @@ export async function parseJsonBody(request: NextRequest): Promise<any> {
  * Validate required fields in request body
  */
 export function validateRequiredFields(
-  body: any,
+  body: Record<string, unknown>,
   requiredFields: string[],
 ): void {
   const missingFields = requiredFields.filter(
@@ -131,7 +133,7 @@ export function validateRequiredFields(
  * Create success response with standardized format
  */
 export function createSuccessResponse(
-  data: any,
+  data: unknown,
   message?: string,
   status = 200,
 ): NextResponse {
@@ -210,7 +212,7 @@ export function parseDateParam(
 // TYPE DEFINITIONS FOR API RESPONSES
 // =============================================================================
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -218,7 +220,7 @@ export interface ApiResponse<T = any> {
   message?: string;
 }
 
-export interface PaginatedResponse<T = any> {
+export interface PaginatedResponse<T = unknown> {
   items: T[];
   total: number;
   limit: number;
@@ -226,8 +228,8 @@ export interface PaginatedResponse<T = any> {
   hasMore: boolean;
 }
 
-export interface FilteredResponse<T = any> {
+export interface FilteredResponse<T = unknown> {
   items: T[];
   count: number;
-  filters: Record<string, any>;
+  filters: Record<string, unknown>;
 }

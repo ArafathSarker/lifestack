@@ -78,6 +78,15 @@ function createErrorResponse(
   );
 }
 
+function parseTransactionDateInput(value: string): Date {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [year, month, day] = value.split("-").map((part) => Number(part));
+    return new Date(year, month - 1, day, 0, 0, 0, 0);
+  }
+
+  return new Date(value);
+}
+
 // =============================================================================
 // API ROUTE HANDLERS
 // =============================================================================
@@ -177,7 +186,7 @@ export async function POST(request: NextRequest) {
       amount: parseFloat(amount),
       description,
       transaction_date: transaction_date
-        ? new Date(transaction_date)
+        ? parseTransactionDateInput(transaction_date)
         : undefined,
     };
 

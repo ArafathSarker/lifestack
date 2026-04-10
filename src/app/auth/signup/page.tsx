@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight, CheckCircle2, Zap, TrendingUp, Dumbbell } from 'lucide-react';
+import { apiRequest } from '@/_lib/apiRequest';
+import { useRouter } from 'next/navigation';
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,7 +18,7 @@ export default function SignupPage() {
     confirmPassword: '',
     agreeToTerms: false,
   });
-
+  const route = useRouter();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -41,7 +43,7 @@ export default function SignupPage() {
     return newErrors;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors = validateForm();
     
@@ -51,10 +53,15 @@ export default function SignupPage() {
     }
 
     setIsLoading(true);
-    setTimeout(() => {
-      console.log('Signup attempt:', formData);
-      window.location.href = '/dashboard';
-    }, 1000);
+    const result:Record<string,any> = await apiRequest({
+      link:"/api/usr/register",
+      method:"POST",
+      obj:formData
+    });
+   
+    if(result.success){
+        route.replace("/auth/login");
+    }
   };
 
   return (
@@ -209,6 +216,7 @@ export default function SignupPage() {
                   className={`w-full rounded-lg border ${errors.confirmPassword ? 'border-red-500 dark:border-red-500' : 'border-slate-200 dark:border-slate-700'} bg-white dark:bg-slate-800 py-3 pl-11 pr-11 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none transition-all focus:ring-2 ${errors.confirmPassword ? 'focus:ring-red-500/20 focus:border-red-500' : 'focus:ring-indigo-500/20 focus:border-indigo-500'} dark:focus:border-indigo-400`}
                   required
                 />
+
                 <button
                   type="button"
                   onClick={() => setShowConfirm(!showConfirm)}

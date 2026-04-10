@@ -1,18 +1,80 @@
 'use client';
 
-import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Card from '@/components/Card';
-import { Settings, Bell, Lock, Eye, Moon, Sun, Globe, HelpCircle } from 'lucide-react';
-import { useState } from 'react';
+import { Settings, Lock, Eye, Moon, Sun, Globe, HelpCircle } from 'lucide-react';
+import { apiRequest } from '@/_lib/apiRequest';
 
 export default function SettingsPage() {
-  const [darkMode, setDarkMode] = useState(false);
-  const [notifications, setNotifications] = useState(true);
+  const [profile, setProfile] = useState({ full_name: '', email: '', height_cm: '', current_weight: '' });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const result = await apiRequest<any>({ method: 'GET', link: '/api/usr/me' });
+        if (result.success) {
+          setProfile({
+            full_name: result.data.full_name || '',
+            email: result.data.email || '',
+            height_cm: result.data.height_cm || '',
+            current_weight: result.data.current_weight || '',
+          });
+        }
+      } catch {
+        router.replace('/auth/login');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, [router]);
+
+  const handleSaveProfile = async () => {
+    setSaving(true);
+    setMessage('');
+    try {
+      const result = await apiRequest<any>({
+        method: 'PUT',
+        link: '/api/usr/me',
+        obj: {
+          full_name: profile.full_name,
+          height_cm: profile.height_cm ? parseFloat(profile.height_cm) : null,
+          current_weight: profile.current_weight ? parseFloat(profile.current_weight) : null,
+        },
+      });
+      if (result.success) {
+        setMessage('Profile saved successfully!');
+        setTimeout(() => setMessage(''), 3000);
+      }
+    } catch (err) {
+      setMessage('Failed to save profile');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await apiRequest<any>({ method: 'POST', link: '/api/usr/logout' });
+    router.replace('/auth/login');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+        <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-      <Navbar isAuthenticated userName="John" />
+      <Navbar isAuthenticated userName={profile.full_name || 'User'} />
 
       <main className="flex-1 py-8 md:py-12">
         <div className="container-responsive">
@@ -53,19 +115,48 @@ export default function SettingsPage() {
               {/* Profile Settings */}
               <Card title="Profile Settings">
                 <div className="space-y-4">
+                  {message && (
+                    <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-sm text-green-700 dark:text-green-300">
+                      {message}
+                    </div>
+                  )}
                   <div>
                     <label className="label-form">Full Name</label>
-                    <input type="text" placeholder="John Doe" className="input-field" defaultValue="John Doe" />
+                    <input
+                      type="text"
+                      placeholder="John Doe"
+                      className="input-field"
+                      value={profile.full_name}
+                      onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
+                    />
                   </div>
                   <div>
                     <label className="label-form">Email Address</label>
-                    <input type="email" placeholder="john@example.com" className="input-field" defaultValue="john@example.com" />
+                    <input type="email" className="input-field" value={profile.email} disabled />
                   </div>
                   <div>
-                    <label className="label-form">Bio</label>
-                    <textarea placeholder="Tell us about yourself..." className="input-field h-20 resize-none" />
+                    <label className="label-form">Height (cm)</label>
+                    <input
+                      type="number"
+                      placeholder="170"
+                      className="input-field"
+                      value={profile.height_cm}
+                      onChange={(e) => setProfile({ ...profile, height_cm: e.target.value })}
+                    />
                   </div>
-                  <button className="btn-primary">Save Changes</button>
+                  <div>
+                    <label className="label-form">Weight (kg)</label>
+                    <input
+                      type="number"
+                      placeholder="70"
+                      className="input-field"
+                      value={profile.current_weight}
+                      onChange={(e) => setProfile({ ...profile, current_weight: e.target.value })}
+                    />
+                  </div>
+                  <button onClick={handleSaveProfile} disabled={saving} className="btn-primary">
+                    {saving ? 'Saving...' : 'Save Changes'}
+                  </button>
                 </div>
               </Card>
 
@@ -120,16 +211,6 @@ export default function SettingsPage() {
                       <label className="flex items-center cursor-pointer">
                         <input type="checkbox" className="w-5 h-5 accent-indigo-600" />
                       </label>
-                    </div>
-                  </button>
-
-                  <button className="w-full p-4 rounded-lg bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-slate-900 dark:text-white">Data & Privacy</p>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">Manage your data and privacy settings</p>
-                      </div>
-                      <span>→</span>
                     </div>
                   </button>
                 </div>
@@ -188,6 +269,13 @@ export default function SettingsPage() {
               {/* Danger Zone */}
               <Card title="Danger Zone">
                 <div className="space-y-3">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors text-left"
+                  >
+                    <p className="font-medium text-amber-700 dark:text-amber-300">Log Out</p>
+                    <p className="text-sm text-amber-600 dark:text-amber-400">Sign out of your account</p>
+                  </button>
                   <button className="w-full p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors text-left">
                     <p className="font-medium text-red-700 dark:text-red-300">Delete Account</p>
                     <p className="text-sm text-red-600 dark:text-red-400">Permanently delete your account and all data</p>

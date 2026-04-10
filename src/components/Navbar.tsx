@@ -2,7 +2,9 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Menu, X, LogOut } from 'lucide-react';
+import { apiRequest } from '@/_lib/apiRequest';
 
 interface NavbarProps {
   isAuthenticated?: boolean;
@@ -11,6 +13,16 @@ interface NavbarProps {
 
 export default function Navbar({ isAuthenticated = false, userName = 'User' }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await apiRequest<any>({ method: 'POST', link: '/api/usr/logout' });
+    } catch {
+      // Even if API fails, redirect to login
+    }
+    router.replace('/auth/login');
+  };
 
   return (
     <nav className="border-b border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm sticky top-0 z-50">
@@ -43,10 +55,10 @@ export default function Navbar({ isAuthenticated = false, userName = 'User' }: N
               </Link>
               <div className="flex items-center gap-4">
                 <span className="text-sm text-slate-600 dark:text-slate-400">Welcome, {userName}</span>
-                <Link href="/" className="btn-secondary text-sm flex items-center gap-2">
+                <button onClick={handleLogout} className="btn-secondary text-sm flex items-center gap-2">
                   <LogOut className="w-4 h-4" />
                   Logout
-                </Link>
+                </button>
               </div>
             </>
           ) : (
@@ -90,10 +102,10 @@ export default function Navbar({ isAuthenticated = false, userName = 'User' }: N
                 </Link>
                 <div className="pt-3 border-t border-slate-200 dark:border-slate-700">
                   <span className="block text-sm text-slate-600 dark:text-slate-400 mb-2">Welcome, {userName}</span>
-                  <Link href="/" className="btn-secondary w-full text-center text-sm flex items-center justify-center gap-2">
+                  <button onClick={handleLogout} className="btn-secondary w-full text-center text-sm flex items-center justify-center gap-2">
                     <LogOut className="w-4 h-4" />
                     Logout
-                  </Link>
+                  </button>
                 </div>
               </>
             ) : (

@@ -10,29 +10,29 @@ export async function POST(request:Request){
         if(result.rowCount === 0) return Response.json({
            success:false,
            message:"Please sign up!"
-        });
+        }, { status: 401 });
         const is_true:boolean = await compareHash(password,result.rows[0].password_hash);
         if(!is_true) return Response.json({
-              status:401,
               success:false,
               message:"Password is incorrect!"
-        });
+        }, { status: 401 });
 
-    if(rememberMe){
-       const token:string = await generateJwt({
-            id:result.rows[0].id,
-            name:result.rows[0].full_name,
-            email:result.rows[0].email
-       });
-      const cookieStore = await cookies();
-      cookieStore.set("token",token,{
-         httpOnly:true,
-         secure:process.env.IS_PRODUCTION === "yes",
-         sameSite:"strict",
-         path: "/",
-         maxAge: 60 * 60 * 24 * 7,
-      });
-    }
+    // Always generate and set the auth cookie
+    const token:string = await generateJwt({
+         id:result.rows[0].id,
+         name:result.rows[0].full_name,
+         email:result.rows[0].email
+    });
+    const cookieStore = await cookies();
+    cookieStore.set("token", token, {
+       httpOnly:true,
+       secure:process.env.IS_PRODUCTION === "yes",
+       sameSite:"strict",
+       path: "/",
+       // Session cookie if rememberMe is off, 7-day cookie if on
+       ...(rememberMe ? { maxAge: 60 * 60 * 24 * 7 } : {}),
+    });
+
       return Response.json({
         success:true,
         message:"Logged in successfully",
@@ -47,8 +47,8 @@ export async function POST(request:Request){
     catch(err)
     {
         return Response.json({
-               status:500,
+               success:false,
                message:String(err)
-        });
+        }, { status: 500 });
     }
 }

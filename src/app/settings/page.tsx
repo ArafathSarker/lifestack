@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Card from '@/components/Card';
 import Modal from '@/components/Modal';
-import { Settings, Lock, Eye, EyeOff, Moon, Sun, Globe, HelpCircle, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Settings, Lock, Eye, EyeOff, Moon, Sun, Globe, HelpCircle, CheckCircle, AlertTriangle, Save, LogOut, Trash2 } from 'lucide-react';
 import { apiRequest } from '@/_lib/apiRequest';
 
 type ActiveSection = 'profile' | 'notifications' | 'privacy' | 'appearance' | 'help';
@@ -215,13 +215,24 @@ export default function SettingsPage() {
     try {
       await apiRequest<any>({ method: 'POST', link: '/api/usr/logout' });
     } catch { /* redirect anyway */ }
+    router.refresh();
     router.replace('/auth/login');
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-        <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+        <Navbar isAuthenticated userName="" />
+        <main className="flex-1 py-8 md:py-12">
+          <div className="container-responsive">
+            <div className="skeleton h-10 w-48 mb-3"></div>
+            <div className="skeleton h-5 w-72 mb-8"></div>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="skeleton h-64 rounded-2xl"></div>
+              <div className="skeleton h-96 rounded-2xl md:col-span-2"></div>
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
@@ -241,12 +252,12 @@ export default function SettingsPage() {
       <main className="flex-1 py-8 md:py-12">
         <div className="container-responsive">
           {/* Header */}
-          <div className="mb-8">
+          <div className="mb-8 animate-slideUp">
             <div className="flex items-center gap-3 mb-2">
               <Settings className="w-8 h-8 text-indigo-600" />
               <h1 className="text-3xl md:text-4xl font-bold">Settings</h1>
             </div>
-            <p className="text-slate-600 dark:text-slate-400">Manage your preferences and account settings</p>
+            <p className="text-slate-500 dark:text-slate-400">Manage your preferences and account settings</p>
           </div>
 
           {/* Settings Grid */}
@@ -258,10 +269,10 @@ export default function SettingsPage() {
                   <button
                     key={item.id}
                     onClick={() => scrollToSection(item.id)}
-                    className={`w-full text-left p-3 rounded-lg transition-all font-medium ${
+                    className={`w-full text-left p-3 rounded-xl transition-all font-medium ${
                       activeSection === item.id
-                        ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border-l-4 border-indigo-600'
-                        : 'hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
+                        ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border-l-4 border-indigo-600 shadow-sm'
+                        : 'hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-400'
                     }`}
                   >
                     <span className="mr-2">{item.icon}</span>
@@ -276,12 +287,12 @@ export default function SettingsPage() {
               {/* ── Profile Settings ── */}
               <div ref={sectionRefs.profile}>
                 <Card title="Profile Settings">
-                  <div className="space-y-4">
+                  <div className="space-y-5">
                     {message && (
-                      <div className={`p-3 rounded-lg border text-sm ${
+                      <div className={`p-3 rounded-xl border text-sm animate-slideUp ${
                         message.type === 'success'
-                          ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300'
-                          : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300'
+                          ? 'bg-green-50 dark:bg-green-900/15 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300'
+                          : 'bg-red-50 dark:bg-red-900/15 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300'
                       }`}>
                         {message.text}
                       </div>
@@ -299,7 +310,7 @@ export default function SettingsPage() {
                     <div>
                       <label className="label-form">Email Address</label>
                       <input type="email" className="input-field opacity-60 cursor-not-allowed" value={profile.email} disabled />
-                      <p className="text-xs text-slate-500 mt-1">Email cannot be changed</p>
+                      <p className="text-xs text-slate-400 mt-1">Email cannot be changed</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -324,7 +335,7 @@ export default function SettingsPage() {
                       </div>
                     </div>
                     {profile.height_cm && profile.current_weight && (
-                      <div className="p-3 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800">
+                      <div className="p-4 rounded-xl bg-indigo-50 dark:bg-indigo-900/15 border border-indigo-200/60 dark:border-indigo-800/40">
                         <p className="text-sm text-indigo-700 dark:text-indigo-300">
                           <span className="font-semibold">BMI: </span>
                           {(parseFloat(profile.current_weight) / ((parseFloat(profile.height_cm) / 100) ** 2)).toFixed(1)}
@@ -339,19 +350,23 @@ export default function SettingsPage() {
                         </p>
                       </div>
                     )}
-                    <button onClick={handleSaveProfile} disabled={saving} className="btn-primary flex items-center gap-2">
-                      {saving ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                          Saving...
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle className="w-4 h-4" />
-                          Save Changes
-                        </>
-                      )}
-                    </button>
+
+                    {/* Fixed button alignment — full width on mobile, right-aligned on desktop */}
+                    <div className="flex justify-end pt-2">
+                      <button onClick={handleSaveProfile} disabled={saving} className="btn-primary w-full sm:w-auto flex items-center justify-center gap-2">
+                        {saving ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4" />
+                            Save Changes
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </Card>
               </div>
@@ -367,10 +382,10 @@ export default function SettingsPage() {
                       { key: 'deadlines' as const, label: 'Task Deadlines', desc: 'Reminders for upcoming deadlines' },
                       { key: 'marketing' as const, label: 'Marketing Emails', desc: 'News and special offers from LifeStack' },
                     ].map((item) => (
-                      <div key={item.key} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600">
+                      <div key={item.key} className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-700/30 border border-slate-200/60 dark:border-slate-600/40">
                         <div>
                           <p className="font-medium text-slate-900 dark:text-white">{item.label}</p>
-                          <p className="text-sm text-slate-600 dark:text-slate-400">{item.desc}</p>
+                          <p className="text-sm text-slate-500 dark:text-slate-400">{item.desc}</p>
                         </div>
                         <button
                           onClick={() => toggleNotification(item.key)}
@@ -391,57 +406,53 @@ export default function SettingsPage() {
               {/* ── Privacy & Security ── */}
               <div ref={sectionRefs.privacy}>
                 <Card title="Privacy & Security">
-                  <div className="space-y-4">
-                    <button
-                      onClick={() => { setShowPasswordModal(true); setPwMessage(null); setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' }); }}
-                      className="w-full p-4 rounded-lg bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-slate-900 dark:text-white flex items-center gap-2">
-                            <Lock className="w-4 h-4" />
-                            Change Password
-                          </p>
-                          <p className="text-sm text-slate-600 dark:text-slate-400">Update your password regularly for security</p>
-                        </div>
-                        <span className="text-slate-400">→</span>
+                  <button
+                    onClick={() => { setShowPasswordModal(true); setPwMessage(null); setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' }); }}
+                    className="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700/30 border border-slate-200/60 dark:border-slate-600/40 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors text-left"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-slate-900 dark:text-white flex items-center gap-2">
+                          <Lock className="w-4 h-4" />
+                          Change Password
+                        </p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">Update your password regularly for security</p>
                       </div>
-                    </button>
-                  </div>
+                      <span className="text-slate-400">→</span>
+                    </div>
+                  </button>
                 </Card>
               </div>
 
               {/* ── Appearance ── */}
               <div ref={sectionRefs.appearance}>
                 <Card title="Appearance">
-                  <div className="space-y-4">
-                    <div>
-                      <p className="font-medium text-slate-900 dark:text-white mb-3">Theme</p>
-                      <div className="grid grid-cols-3 gap-3">
-                        {[
-                          { label: 'Light', value: 'light' as const, icon: Sun },
-                          { label: 'Dark', value: 'dark' as const, icon: Moon },
-                          { label: 'Auto', value: 'auto' as const, icon: Globe },
-                        ].map((t) => {
-                          const Icon = t.icon;
-                          const isActive = theme === t.value;
-                          return (
-                            <button
-                              key={t.value}
-                              onClick={() => setTheme(t.value)}
-                              className={`p-4 rounded-lg border-2 transition-all flex flex-col items-center gap-2 ${
-                                isActive
-                                  ? 'border-indigo-500 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 shadow-md'
-                                  : 'border-slate-200 dark:border-slate-600 hover:border-indigo-300 dark:hover:border-indigo-600'
-                              }`}
-                            >
-                              <Icon className={`w-6 h-6 ${isActive ? 'text-indigo-600 dark:text-indigo-400' : ''}`} />
-                              <span className={`text-sm font-medium ${isActive ? 'text-indigo-700 dark:text-indigo-300' : ''}`}>{t.label}</span>
-                              {isActive && <CheckCircle className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />}
-                            </button>
-                          );
-                        })}
-                      </div>
+                  <div>
+                    <p className="font-medium text-slate-900 dark:text-white mb-3">Theme</p>
+                    <div className="grid grid-cols-3 gap-3">
+                      {[
+                        { label: 'Light', value: 'light' as const, icon: Sun },
+                        { label: 'Dark', value: 'dark' as const, icon: Moon },
+                        { label: 'Auto', value: 'auto' as const, icon: Globe },
+                      ].map((t) => {
+                        const Icon = t.icon;
+                        const isActive = theme === t.value;
+                        return (
+                          <button
+                            key={t.value}
+                            onClick={() => setTheme(t.value)}
+                            className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
+                              isActive
+                                ? 'border-indigo-500 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 shadow-md'
+                                : 'border-slate-200 dark:border-slate-600 hover:border-indigo-300 dark:hover:border-indigo-600'
+                            }`}
+                          >
+                            <Icon className={`w-6 h-6 ${isActive ? 'text-indigo-600 dark:text-indigo-400' : ''}`} />
+                            <span className={`text-sm font-medium ${isActive ? 'text-indigo-700 dark:text-indigo-300' : ''}`}>{t.label}</span>
+                            {isActive && <CheckCircle className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 </Card>
@@ -459,13 +470,13 @@ export default function SettingsPage() {
                     ].map((item, idx) => (
                       <button
                         key={idx}
-                        className="w-full p-4 rounded-lg bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left flex items-center justify-between"
+                        className="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700/30 border border-slate-200/60 dark:border-slate-600/40 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors text-left flex items-center justify-between"
                       >
                         <div>
                           <p className="font-medium text-slate-900 dark:text-white">{item.title}</p>
-                          <p className="text-sm text-slate-600 dark:text-slate-400">{item.desc}</p>
+                          <p className="text-sm text-slate-500 dark:text-slate-400">{item.desc}</p>
                         </div>
-                        <HelpCircle className="w-5 h-5 text-slate-400" />
+                        <HelpCircle className="w-5 h-5 text-slate-400 flex-shrink-0" />
                       </button>
                     ))}
                   </div>
@@ -477,17 +488,23 @@ export default function SettingsPage() {
                 <div className="space-y-3">
                   <button
                     onClick={handleLogout}
-                    className="w-full p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors text-left"
+                    className="w-full p-4 rounded-xl bg-amber-50 dark:bg-amber-900/15 border border-amber-200/60 dark:border-amber-800/40 hover:bg-amber-100 dark:hover:bg-amber-900/25 transition-colors text-left flex items-center gap-3"
                   >
-                    <p className="font-medium text-amber-700 dark:text-amber-300">Log Out</p>
-                    <p className="text-sm text-amber-600 dark:text-amber-400">Sign out of your account</p>
+                    <LogOut className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium text-amber-700 dark:text-amber-300">Log Out</p>
+                      <p className="text-sm text-amber-600 dark:text-amber-400">Sign out of your account</p>
+                    </div>
                   </button>
                   <button
                     onClick={() => { setShowDeleteModal(true); setDeletePassword(''); setDeleteConfirmText(''); setDeleteMessage(''); }}
-                    className="w-full p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors text-left"
+                    className="w-full p-4 rounded-xl bg-red-50 dark:bg-red-900/15 border border-red-200/60 dark:border-red-800/40 hover:bg-red-100 dark:hover:bg-red-900/25 transition-colors text-left flex items-center gap-3"
                   >
-                    <p className="font-medium text-red-700 dark:text-red-300">Delete Account</p>
-                    <p className="text-sm text-red-600 dark:text-red-400">Permanently delete your account and all data</p>
+                    <Trash2 className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium text-red-700 dark:text-red-300">Delete Account</p>
+                      <p className="text-sm text-red-600 dark:text-red-400">Permanently delete your account and all data</p>
+                    </div>
                   </button>
                 </div>
               </Card>
@@ -500,10 +517,10 @@ export default function SettingsPage() {
       <Modal isOpen={showPasswordModal} title="Change Password" onClose={() => setShowPasswordModal(false)}>
         <form onSubmit={handleChangePassword} className="space-y-4">
           {pwMessage && (
-            <div className={`p-3 rounded-lg border text-sm ${
+            <div className={`p-3 rounded-xl border text-sm ${
               pwMessage.type === 'success'
-                ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300'
-                : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300'
+                ? 'bg-green-50 dark:bg-green-900/15 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300'
+                : 'bg-red-50 dark:bg-red-900/15 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300'
             }`}>
               {pwMessage.text}
             </div>
@@ -575,7 +592,7 @@ export default function SettingsPage() {
       {/* ── Delete Account Modal ── */}
       <Modal isOpen={showDeleteModal} title="Delete Account" onClose={() => setShowDeleteModal(false)}>
         <div className="space-y-4">
-          <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+          <div className="p-4 rounded-xl bg-red-50 dark:bg-red-900/15 border border-red-200/60 dark:border-red-800/40">
             <div className="flex gap-3">
               <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
               <div>
@@ -588,38 +605,26 @@ export default function SettingsPage() {
           </div>
 
           {deleteMessage && (
-            <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-300">
+            <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/15 border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-300">
               {deleteMessage}
             </div>
           )}
 
           <div>
             <label className="label-form">Enter your password</label>
-            <input
-              type="password"
-              value={deletePassword}
-              onChange={(e) => setDeletePassword(e.target.value)}
-              placeholder="Your account password"
-              className="input-field"
-            />
+            <input type="password" value={deletePassword} onChange={(e) => setDeletePassword(e.target.value)} placeholder="Your account password" className="input-field" />
           </div>
 
           <div>
             <label className="label-form">Type <span className="font-bold text-red-600">DELETE</span> to confirm</label>
-            <input
-              type="text"
-              value={deleteConfirmText}
-              onChange={(e) => setDeleteConfirmText(e.target.value)}
-              placeholder="DELETE"
-              className="input-field"
-            />
+            <input type="text" value={deleteConfirmText} onChange={(e) => setDeleteConfirmText(e.target.value)} placeholder="DELETE" className="input-field" />
           </div>
 
           <div className="flex gap-3 pt-2">
             <button
               onClick={handleDeleteAccount}
               disabled={deleting || deleteConfirmText !== 'DELETE' || !deletePassword}
-              className="flex-1 py-3 px-4 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+              className="btn-danger flex-1 flex items-center justify-center gap-2"
             >
               {deleting ? (
                 <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Deleting...</>

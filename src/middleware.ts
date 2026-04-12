@@ -4,7 +4,7 @@ import { jwtVerify } from "jose";
 const secret = new TextEncoder().encode(process.env.JWT_SECRET || "lifestack");
 
 const protectedRoutes = ["/dashboard", "/fitness", "/finance", "/study", "/settings"];
-const authRoutes = ["/auth/login", "/auth/signup"];
+const authRoutes = ["/auth/login", "/auth/signup", "/auth/forgot-password"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

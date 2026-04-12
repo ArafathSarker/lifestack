@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -21,19 +22,31 @@ export default function LoginPage() {
       ...formData,
       [name]: type === 'checkbox' ? checked : value,
     });
+    // Clear error when user types
+    if (errorMessage) setErrorMessage('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    const result:Record<string,any> = await apiRequest({
-      link:"/api/usr/login",
-      method:"POST",
-      obj:formData,
-    });
+    setErrorMessage('');
+    try {
+      const result: Record<string, any> = await apiRequest({
+        link: "/api/usr/login",
+        method: "POST",
+        obj: formData,
+      });
 
-    if(result.success){
-      router.replace("/dashboard");
+      if (result.success) {
+        router.refresh();
+        router.replace("/dashboard");
+      } else {
+        setErrorMessage(result.message || 'Login failed. Please try again.');
+        setIsLoading(false);
+      }
+    } catch (err) {
+      setErrorMessage('Invalid email or password. Please try again.');
+      setIsLoading(false);
     }
   };
 
@@ -82,7 +95,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <p className="text-white/60 text-sm absolute bottom-8 left-12 right-12 text-center">2024 © LifeStack. Your personal life management hub.</p>
+        <p className="text-white/60 text-sm absolute bottom-8 left-12 right-12 text-center">2026 © LifeStack. Your personal life management hub.</p>
       </div>
 
       {/* Right Section - Login Form */}
@@ -99,6 +112,13 @@ export default function LoginPage() {
             <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-3">Welcome Back</h1>
             <p className="text-slate-600 dark:text-slate-400">Sign in to access your dashboard and manage your life</p>
           </div>
+
+          {/* Error Message */}
+          {errorMessage && (
+            <div className="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm animate-slideUp">
+              {errorMessage}
+            </div>
+          )}
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -128,9 +148,9 @@ export default function LoginPage() {
                 <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Password
                 </label>
-                <a href="#" className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium transition-colors">
+                <Link href="/auth/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium transition-colors">
                   Forgot?
-                </a>
+                </Link>
               </div>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -173,7 +193,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-slate-400 disabled:to-slate-500 text-white font-semibold py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 mt-7 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-slate-400 disabled:to-slate-500 text-white font-semibold py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 mt-7 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
             >
               {isLoading ? (
                 <>

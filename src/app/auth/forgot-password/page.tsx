@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Mail, ArrowLeft, CheckCircle, Send } from 'lucide-react';
+import Logo from '@/components/Logo';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -31,11 +32,8 @@ export default function ForgotPasswordPage() {
         </Link>
 
         {/* Logo */}
-        <div className="inline-flex items-center gap-2 mb-8">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
-            <span className="text-white font-bold text-lg">L</span>
-          </div>
-          <span className="font-semibold text-slate-900 dark:text-white">LifeStack</span>
+        <div className="mb-8">
+          <Logo size={40} />
         </div>
 
         {!isSubmitted ? (

@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Menu, X, LogOut, Activity, Wallet, BookOpen, LayoutDashboard, Settings, User, ChevronDown } from 'lucide-react';
 import { apiRequest } from '@/_lib/apiRequest';
+import Logo from '@/components/Logo';
 
 interface NavbarProps {
   isAuthenticated?: boolean;
@@ -63,17 +64,8 @@ export default function Navbar({ isAuthenticated = false, userName = 'User' }: N
     <nav className="navbar-glass sticky top-0 z-50">
       <div className="container-responsive flex items-center justify-between h-16">
         {/* Logo */}
-        <Link href={isAuthenticated ? '/dashboard' : '/'} className="flex items-center gap-2.5 group">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-shadow">
-            <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2L2 7l10 5 10-5-10-5z" />
-              <path d="M2 17l10 5 10-5" />
-              <path d="M2 12l10 5 10-5" />
-            </svg>
-          </div>
-          <span className="text-lg font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent hidden sm:inline">
-            LifeStack
-          </span>
+        <Link href={isAuthenticated ? '/dashboard' : '/'} className="group">
+          <Logo size={36} showText={true} />
         </Link>
 
         {/* Desktop Navigation */}

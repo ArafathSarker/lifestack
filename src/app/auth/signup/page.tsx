@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight, CheckCircle2, Zap, TrendingUp, Dumbbell } from 'lucide-react';
 import { apiRequest } from '@/_lib/apiRequest';
 import { useRouter } from 'next/navigation';
+import Logo from '@/components/Logo';
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -69,9 +70,7 @@ export default function SignupPage() {
       {/* Left Section - Feature Showcase */}
       <div className="hidden lg:flex lg:w-1/2 fixed left-0 top-0 h-screen flex-col items-center justify-center p-12 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 relative">
         <div className="absolute top-8 left-8">
-          <div className="w-12 h-12 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center mb-2">
-            <span className="text-white font-bold text-xl">LS</span>
-          </div>
+          <Logo size={48} className="[&_span]:text-white" />
           <h2 className="text-3xl font-bold text-white mt-2">LifeStack</h2>
         </div>
 
@@ -117,11 +116,8 @@ export default function SignupPage() {
         <div className="w-full max-w-md">
           {/* Header */}
           <div className="mb-10">
-            <div className="inline-flex items-center gap-2 mb-6">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
-                <span className="text-white font-bold text-lg">L</span>
-              </div>
-              <span className="font-semibold text-slate-900 dark:text-white">LifeStack</span>
+            <div className="mb-6">
+              <Logo size={40} />
             </div>
             <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-3">Create Account</h1>
             <p className="text-slate-600 dark:text-slate-400">Join thousands managing their lives with LifeStack</p>

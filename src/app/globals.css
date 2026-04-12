@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
   --color-primary: #6366f1;
   --color-primary-dark: #4f46e5;
@@ -45,13 +47,7 @@ body {
   -webkit-backdrop-filter: blur(20px) saturate(180%);
 }
 
-@media (prefers-color-scheme: dark) {
-  .navbar-glass {
-    background: rgba(15, 23, 42, 0.78);
-  }
-}
-
-:root.dark .navbar-glass {
+.dark .navbar-glass {
   background: rgba(15, 23, 42, 0.78);
 }
 
@@ -199,19 +195,7 @@ body {
   background-size: 200% 100%;
 }
 
-@media (prefers-color-scheme: dark) {
-  .skeleton {
-    background: linear-gradient(
-      90deg,
-      rgb(51 65 85) 0%,
-      rgb(71 85 105) 40%,
-      rgb(51 65 85) 80%
-    );
-    background-size: 200% 100%;
-  }
-}
-
-:root.dark .skeleton {
+.dark .skeleton {
   background: linear-gradient(
     90deg,
     rgb(51 65 85) 0%,
@@ -344,16 +328,14 @@ body {
   background-color: rgb(148 163 184);
 }
 
-@media (prefers-color-scheme: dark) {
-  ::-webkit-scrollbar-track {
-    background-color: rgb(30 41 59);
-  }
+.dark ::-webkit-scrollbar-track {
+  background-color: rgb(30 41 59);
+}
 
-  ::-webkit-scrollbar-thumb {
-    background-color: rgb(71 85 105);
-  }
+.dark ::-webkit-scrollbar-thumb {
+  background-color: rgb(71 85 105);
+}
 
-  ::-webkit-scrollbar-thumb:hover {
-    background-color: rgb(100 116 139);
-  }
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(100 116 139);
 }

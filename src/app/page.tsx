@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { ArrowRight, Activity, TrendingUp, BookOpen, Zap, Shield, Globe, BarChart3 } from 'lucide-react';
+import Logo from '@/components/Logo';
 
 export default function Home() {
   return (
@@ -9,17 +10,8 @@ export default function Home() {
       {/* Navigation */}
       <nav className="navbar-glass sticky top-0 z-50">
         <div className="container-responsive flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-shadow">
-              <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                <path d="M2 17l10 5 10-5" />
-                <path d="M2 12l10 5 10-5" />
-              </svg>
-            </div>
-            <span className="text-lg font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
-              LifeStack
-            </span>
+          <Link href="/" className="group">
+            <Logo size={36} />
           </Link>
           <div className="flex items-center gap-3">
             <Link href="/auth/login" className="btn-secondary text-sm">
@@ -165,15 +157,8 @@ export default function Home() {
         <div className="container-responsive">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center shadow-md">
-                  <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                    <path d="M2 17l10 5 10-5" />
-                    <path d="M2 12l10 5 10-5" />
-                  </svg>
-                </div>
-                <span className="font-bold text-lg">LifeStack</span>
+              <div className="mb-4">
+                <Logo size={36} />
               </div>
               <p className="text-slate-600 dark:text-slate-400 text-sm">Your personal life management hub</p>
             </div>

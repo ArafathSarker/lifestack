@@ -57,6 +57,7 @@ export default function FitnessPage() {
   const [calories, setCalories] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState('');
   const router = useRouter();
 
   const [workoutData, setWorkoutData] = useState({
@@ -75,14 +76,16 @@ export default function FitnessPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [workoutsRes, caloriesRes, statsRes] = await Promise.all([
+      const [workoutsRes, caloriesRes, statsRes, userRes] = await Promise.all([
         apiRequest<any>({ method: 'GET', link: '/api/fitness/workouts?limit=10' }),
         apiRequest<any>({ method: 'GET', link: '/api/fitness/calories?limit=10' }),
         apiRequest<any>({ method: 'GET', link: '/api/fitness/stats' }),
+        apiRequest<any>({ method: 'GET', link: '/api/usr/me' }),
       ]);
       if (workoutsRes.success) setWorkouts(workoutsRes.data);
       if (caloriesRes.success) setCalories(caloriesRes.data);
       if (statsRes.success) setStats(statsRes.data);
+      if (userRes.success) setUserName(userRes.data.full_name || '');
     } catch {
       router.replace('/auth/login');
     } finally {
@@ -187,7 +190,7 @@ export default function FitnessPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-      <Navbar isAuthenticated userName="User" />
+      <Navbar isAuthenticated userName={userName} />
 
       <main className="flex-1 py-8 md:py-12">
         <div className="container-responsive">

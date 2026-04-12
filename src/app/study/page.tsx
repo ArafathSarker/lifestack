@@ -84,6 +84,7 @@ export default function StudyPage() {
   const [sessions, setSessions] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState('');
   const [selectedTaskId, setSelectedTaskId] = useState<string>('');
   const [filter, setFilter] = useState<FilterType>('all');
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
@@ -103,14 +104,16 @@ export default function StudyPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [tasksRes, sessionsRes, statsRes] = await Promise.all([
+      const [tasksRes, sessionsRes, statsRes, userRes] = await Promise.all([
         apiRequest<any>({ method: 'GET', link: '/api/study/tasks?limit=50' }),
         apiRequest<any>({ method: 'GET', link: '/api/study/sessions?limit=10' }),
         apiRequest<any>({ method: 'GET', link: '/api/study/stats' }),
+        apiRequest<any>({ method: 'GET', link: '/api/usr/me' }),
       ]);
       if (tasksRes.success) setTasks(tasksRes.data);
       if (sessionsRes.success) setSessions(sessionsRes.data);
       if (statsRes.success) setStats(statsRes.data);
+      if (userRes.success) setUserName(userRes.data.full_name || '');
     } catch {
       router.replace('/auth/login');
     } finally {
@@ -281,7 +284,7 @@ export default function StudyPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-      <Navbar isAuthenticated userName="User" />
+      <Navbar isAuthenticated userName={userName} />
 
       <main className="flex-1 py-8 md:py-12">
         <div className="container-responsive">

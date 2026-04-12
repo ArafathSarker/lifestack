@@ -92,6 +92,7 @@ export default function FinancePage() {
   const [stats, setStats] = useState<any>(null);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState('');
   const router = useRouter();
 
   const [transactionData, setTransactionData] = useState({
@@ -107,14 +108,16 @@ export default function FinancePage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [txRes, statsRes, catRes] = await Promise.all([
+      const [txRes, statsRes, catRes, userRes] = await Promise.all([
         apiRequest<any>({ method: 'GET', link: '/api/finance/transactions?limit=10' }),
         apiRequest<any>({ method: 'GET', link: '/api/finance/stats' }),
         apiRequest<any>({ method: 'GET', link: '/api/finance/categories' }),
+        apiRequest<any>({ method: 'GET', link: '/api/usr/me' }),
       ]);
       if (txRes.success) setTransactions(txRes.data);
       if (statsRes.success) setStats(statsRes.data);
       if (catRes.success) setCategories(catRes.data);
+      if (userRes.success) setUserName(userRes.data.full_name || '');
     } catch {
       router.replace('/auth/login');
     } finally {
@@ -189,7 +192,7 @@ export default function FinancePage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-      <Navbar isAuthenticated userName="User" />
+      <Navbar isAuthenticated userName={userName} />
 
       <main className="flex-1 py-8 md:py-12">
         <div className="container-responsive">
